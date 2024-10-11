@@ -1,0 +1,14 @@
+.zig-cache/
+zig-out/
+*/.zig-cache/
+*/zig-out/
+
+# misc
+.DS_Store
+
+# IDE
+.vscode
+.idea
+
+.env
+*/.env
