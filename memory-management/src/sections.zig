@@ -1,12 +1,13 @@
 const std = @import("std");
 
 // https://codeberg.org/dude_the_builder/zig_in_depth/src/branch/main/21_memory/src/sections.zig#
+// https://youtu.be/I_ynVBs66Oc?si=kZqE42VwNjjqgxjt
 
 // Memory Sections or Where are the bytes?
 
 // Stored in global constant section of memory.
-const pi: f64 = 3.1415;
-const greeting = "Hello";
+const pi: f64 = 3.1415; // in global constant section because the value is known at compile time
+const greeting = "Hello"; // String literals are pointers to Sentinel terminated arrays -- That array will be in the global constant section of memory
 
 // Stored in the global data section.
 var count: usize = 0;
@@ -21,14 +22,14 @@ fn locals() u8 {
     // Here a copy of result is returned,
     // since it's a primitive numeric type.
     return result;
-}
+} // When this function returns, its stack-frame will be destroyed and all of this memory (these local variables) will be freed up
 
 fn badIdea1() *u8 {
     // `x` lives on the stack.
     var x: u8 = 42;
     // Invalid pointer once the function returns
     // and its stack frame is destroyed.
-    return &x;
+    return &x; //this will point to an area of memory that will no longer be valid when the stack-frame is destroyed
 }
 
 fn badIdea2() []u8 {
@@ -48,7 +49,7 @@ fn goodIdea(allocator: std.mem.Allocator) std.mem.Allocator.Error![]u8 {
     std.mem.copy(u8, s, &array);
     // This is OK since `s` points to bytes allocated on the
     // heap and thus outlives the function's stack frame.
-    return s;
+    return s; // 's' is now a slice whose pointer is pointing to bytes that are allocated on the heap (thus outliving this function)
 }
 
 const Foo = struct {

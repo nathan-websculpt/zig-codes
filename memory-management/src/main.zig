@@ -13,8 +13,8 @@ pub fn main() !void {}
 fn catOutVarLen(
     a: []const u8,
     b: []const u8,
-    out: []u8,
-) usize {
+    out: []u8, // write to this...
+) usize { // usize here is how many bytes you wrote inside of this function
     // Make sure we have enough space.
     std.debug.assert(out.len >= a.len + b.len);
     // Copy the bytes.
@@ -24,6 +24,7 @@ fn catOutVarLen(
     return a.len + b.len;
 }
 
+//use this function^^^^
 test "catOutVarLen" {
     const hello: []const u8 = "Hello ";
     const world: []const u8 = "world";
