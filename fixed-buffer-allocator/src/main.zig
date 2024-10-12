@@ -3,6 +3,10 @@ const std = @import("std");
 // https://codeberg.org/dude_the_builder/zig_in_depth/src/branch/main/22_fba/src/main.zig#
 // https://youtu.be/5jht76c1cVI?si=DywmUJrUWfPQCao6
 
+// This is for situations when you know how much memory you need ahead of time
+// Strictly using memory on the stack (bytes/buffer)
+// Faster than using memory allocated on the heap (Because when you allocate on the heap you have to make a request to the operating system)
+
 // Returns the concatenation of `a` and `b` as newly allocated bytes.
 // Caller must free returned bytes with `allocator`.
 fn catAlloc(
@@ -20,7 +24,7 @@ fn catAlloc(
 }
 
 test "fba bytes" {
-    // Our inputs.
+    // Each string has six bytes
     const hello = "Hello ";
     const world = "world!";
 
@@ -29,12 +33,14 @@ test "fba bytes" {
     var buf: [12]u8 = undefined;
     // And then use that buffer as the backing-store for a FixedBufferAllocator.
     var fba = std.heap.FixedBufferAllocator.init(&buf);
-    const allocator = fba.allocator();
+    const allocator = fba.allocator(); //All the allocators follow this approach
 
     const result = try catAlloc(allocator, hello, world);
     defer allocator.free(result);
 
     try std.testing.expectEqualStrings(hello ++ world, result);
+
+    // no need to deinit the fba, because this is memory on the stack
 }
 
 // Returns a slice with elements of the type of `item` and length `n`.
@@ -42,7 +48,7 @@ test "fba bytes" {
 fn sliceOfAlloc(
     allocator: std.mem.Allocator,
     item: anytype,
-    n: usize,
+    n: usize, // how much memory we'll be allocating
 ) ![]@TypeOf(item) {
     const slice = try allocator.alloc(@TypeOf(item), n);
     for (slice) |*e| e.* = item;
