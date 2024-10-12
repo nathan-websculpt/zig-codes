@@ -1,13 +1,12 @@
 const std = @import("std");
 
-// https://codeberg.org/dude_the_builder/zig_in_depth/src/branch/main/23_arena/src/list_arena.zig#
-// https://youtu.be/aUSYxDg6RYM?si=VaPbqQ1K0rsu641_
+// https://codeberg.org/dude_the_builder/zig_in_depth/src/branch/main/24_allocators/src/list_arena.zig#
+// https://youtu.be/rxo0j08ctdQ?si=rnn_TX4APN9i3qko
 
 /// A generic linked list that uses an ArenaAllocator internally.
 pub fn List(comptime T: type) type {
     return struct {
         const Node = struct {
-            //allocator: std.mem.Allocator, /////////
             data: T,
             next: ?*Node,
 

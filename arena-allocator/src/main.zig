@@ -3,6 +3,11 @@ const std = @import("std");
 // https://youtu.be/aUSYxDg6RYM?si=VaPbqQ1K0rsu641_
 // https://codeberg.org/dude_the_builder/zig_in_depth/src/branch/main/23_arena/src/main.zig#
 
+// (My current understanding) At the "end of the program" you deinit on the arena, and it deallocates all of the arena allocations
+// This is a much different strategy from the other allocators
+// Eliminates overhead of allocating and deallocating multiple times
+// Potentially good for short lived command-line applications
+
 // const List = @import("list.zig").List;
 const List = @import("list_arena.zig").List;
 

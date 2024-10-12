@@ -1,49 +1,51 @@
 const std = @import("std");
 
-// https://codeberg.org/dude_the_builder/zig_in_depth/src/branch/main/23_arena/src/list_arena.zig#
-// https://youtu.be/aUSYxDg6RYM?si=VaPbqQ1K0rsu641_
+// https://codeberg.org/dude_the_builder/zig_in_depth/src/branch/main/24_allocators/src/list.zig#
+// https://youtu.be/rxo0j08ctdQ?si=rnn_TX4APN9i3qko
 
-/// A generic linked list that uses an ArenaAllocator internally.
+/// A generic linked list that uses the provided allocator.
 pub fn List(comptime T: type) type {
     return struct {
         const Node = struct {
-            //allocator: std.mem.Allocator, /////////
+            allocator: std.mem.Allocator,
             data: T,
             next: ?*Node,
 
             fn init(allocator: std.mem.Allocator, data: T) !*Node {
                 const ptr = try allocator.create(Node);
+                ptr.allocator = allocator;
                 ptr.data = data;
                 ptr.next = null;
 
                 return ptr;
             }
+
+            fn deinit(self: *Node) void {
+                if (self.next) |ptr| ptr.deinit();
+                self.allocator.destroy(self);
+            }
         };
 
         const Self = @This();
 
-        arena: std.heap.ArenaAllocator,
+        allocator: std.mem.Allocator,
         head: *Node,
 
         pub fn init(allocator: std.mem.Allocator, data: T) !Self {
-            var list = Self{
-                .arena = std.heap.ArenaAllocator.init(allocator),
-                .head = undefined,
+            return .{
+                .allocator = allocator,
+                .head = try Node.init(allocator, data),
             };
-
-            list.head = try Node.init(list.arena.allocator(), data);
-
-            return list;
         }
 
         pub fn deinit(self: *Self) void {
-            self.arena.deinit();
+            self.head.deinit();
         }
 
         pub fn append(self: *Self, data: T) !void {
             var tail: *Node = self.head;
             while (tail.next) |ptr| tail = ptr;
-            tail.next = try Node.init(self.arena.allocator(), data);
+            tail.next = try Node.init(self.allocator, data);
         }
 
         pub fn lookup(self: Self, data: T) bool {
